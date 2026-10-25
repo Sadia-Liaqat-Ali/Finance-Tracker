@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>📊 Your Financial Dashboard</h2>
+
+<div class="summary-cards">
+    <div class="card income">
+        <h3>💰 Total Income</h3>
+        <div class="amount">PKR {{ "%.2f"|format(total_income) }}</div>
+    </div>
+    <div class="card expense">
+        <h3>💸 Total Expenses</h3>
+        <div class="amount">PKR {{ "%.2f"|format(total_expense) }}</div>
+    </div>
+    <div class="card balance">
+        <h3>💵 Net Balance</h3>
+        <div class="amount">PKR {{ "%.2f"|format(balance) }}</div>
+    </div>
+    
+    <!-- AI Prediction Card - Shows only if enough data -->
+    {% if prediction_data %}
+    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <h3>🔮 Next Month Prediction</h3>
+        <div class="amount">PKR {{ "%.2f"|format(prediction_data.next_month) }}</div>
+        <small>Trend: {{ prediction_data.trend|capitalize }}</small>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Quick Stats Row -->
+<div style="display: flex; gap: 15px; justify-content: space-between; flex-wrap: wrap; margin-bottom: 30px;">
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; flex: 1; text-align: center;">
+        <strong>📊 Total Transactions</strong><br>
+        <span style="font-size: 24px; color: #667eea;">{{ recent_transactions|length }}</span>
+    </div>
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; flex: 1; text-align: center;">
+        <strong>📅 Savings Rate</strong><br>
+        <span style="font-size: 24px; color: 
+            {% if total_income > 0 and balance > 0 %}#27ae60
+            {% elif balance < 0 %}#e74c3c
+            {% else %}#f39c12
+            {% endif %};">
+            {% if total_income > 0 %}
+                {{ "%.1f"|format((balance / total_income) * 100) }}%
+            {% else %}
+                0%
+            {% endif %}
+        </span>
+    </div>
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; flex: 1; text-align: center;">
+        <strong>🎯 Monthly Goal</strong><br>
+        <span style="font-size: 24px; color: #f39c12;">
+            {% if total_income > 0 %}
+                PKR {{ "%.0f"|format(total_income * 0.2) }}
+            {% else %}
+                PKR 0
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<!-- Recent Transactions Section -->
+<div style="margin-top: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3>📅 Recent Transactions</h3>
+        <a href="{{ url_for('view_transactions') }}" class="btn btn-primary btn-sm">View All →</a>
+    </div>
+    
+    {% if recent_transactions %}
+    <div style="overflow-x: auto;">
+        <table class="transaction-table">
+            <thead>
+                <table>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount (PKR)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in recent_transactions %}
+                <tr>
+                    <td>{{ t.date.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <span class="{% if t.type == 'income' %}income-text{% else %}expense-text{% endif %}">
+                            {{ t.type|upper }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if t.category == 'food' %}🍔 
+                        {% elif t.category == 'transport' %}🚗 
+                        {% elif t.category == 'bills' %}💡 
+                        {% elif t.category == 'shopping' %}🛍️ 
+                        {% elif t.category == 'entertainment' %}🎬 
+                        {% elif t.category == 'health' %}🏥 
+                        {% elif t.category == 'education' %}📚 
+                        {% elif t.category == 'rent' %}🏠 
+                        {% elif t.category == 'salary' %}💼 
+                        {% endif %}
+                        {{ t.category|capitalize }}
+                    </td>
+                    <td>{{ t.description[:30] if t.description else '-' }}</td>
+                    <td class="{% if t.type == 'income' %}income-text{% else %}expense-text{% endif %}">
+                        PKR {{ "%.2f"|format(t.amount) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 60px; background: #f9f9f9; border-radius: 15px;">
+        <p style="color: #999; font-size: 18px;">📭 No transactions yet.</p>
+        <a href="{{ url_for('add_transaction') }}" class="btn btn-success" style="margin-top: 15px;">➕ Add Your First Transaction</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Quick Action Buttons -->
+<div style="margin-top: 30px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+    <a href="{{ url_for('add_transaction') }}" class="btn btn-success">➕ Add Income/Expense</a>
+    <a href="{{ url_for('visualization') }}" class="btn btn-primary">📊 View Charts</a>
+    <a href="{{ url_for('prediction') }}" class="btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">🔮 AI Prediction</a>
+    <a href="{{ url_for('export_data') }}" class="btn btn-warning">📥 Export to Excel</a>
+</div>
+
+<!-- Financial Tips -->
+<div style="margin-top: 30px; background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); padding: 20px; border-radius: 15px; color: white;">
+    <h4>💡 Smart Financial Tips</h4>
+    <ul style="margin-top: 10px; margin-left: 20px; line-height: 1.8;">
+        {% if balance < 0 %}
+            <li>⚠️ Your expenses exceed income! Consider reviewing your spending habits.</li>
+        {% elif balance > 0 and balance < total_income * 0.2 %}
+            <li>📈 Good start! Try to save at least 20% of your income.</li>
+        {% elif balance >= total_income * 0.2 %}
+            <li>🌟 Excellent savings rate! You're on the right track!</li>
+        {% else %}
+            <li>💪 Track every expense to understand where your money goes.</li>
+        {% endif %}
+        <li>🎯 Set a monthly budget and stick to it.</li>
+        <li>📊 Regular review of your finances helps achieve goals faster.</li>
+        <li>🔮 Use the AI Prediction feature to plan your future expenses.</li>
+    </ul>
+</div>
+{% endblock %}

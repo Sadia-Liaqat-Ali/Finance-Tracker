@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>🔮 AI-Powered Expense Prediction</h2>
+
+<!-- Prediction Cards -->
+<div class="summary-cards">
+    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <h3>📊 Predicted Next Month Expenses</h3>
+        <div class="amount">PKR {{ "%.2f"|format(predictions.next_month_total) }}</div>
+        <small>Based on AI analysis of your spending patterns</small>
+    </div>
+    
+    <div class="card income">
+        <h3>💰 Average Monthly Income</h3>
+        <div class="amount">PKR {{ "%.2f"|format(predictions.avg_monthly_income) }}</div>
+        <small>Based on your income history</small>
+    </div>
+    
+    <div class="card balance">
+        <h3>💵 Predicted Savings</h3>
+        <div class="amount">
+            {% if predictions.predicted_savings > 0 %}
+                PKR {{ "%.2f"|format(predictions.predicted_savings) }}
+            {% else %}
+                -PKR {{ "%.2f"|format(predictions.predicted_savings|abs) }}
+            {% endif %}
+        </div>
+        <small>Expected savings next month</small>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="summary-cards">
+    <div class="card expense">
+        <h3>📈 Spending Trend</h3>
+        <div class="amount">
+            {% if predictions.trend == 'increasing' %}
+                🔺 Increasing
+            {% elif predictions.trend == 'decreasing' %}
+                🔻 Decreasing
+            {% else %}
+                ➡️ Stable
+            {% endif %}
+        </div>
+        <small>Based on recent 14 days comparison</small>
+    </div>
+    
+    <div class="card">
+        <h3>⚠️ Overspending Alert</h3>
+        <div class="amount">{{ predictions.overspending_days }} days</div>
+        <small>Days exceeding 20% above your average</small>
+    </div>
+    
+    <div class="card">
+        <h3>📊 Analysis Period</h3>
+        <div class="amount">{{ predictions.total_records }} records</div>
+        <small>Total expense transactions analyzed</small>
+    </div>
+</div>
+
+<!-- Model Information -->
+<div style="background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); padding: 20px; border-radius: 15px; margin: 20px 0; color: white;">
+    <h3>🤖 Machine Learning Model Information</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;">
+        <div>
+            <strong>Model Type:</strong><br>
+            Linear Regression
+        </div>
+        <div>
+            <strong>Training Data:</strong><br>
+            {{ predictions.total_records }} expense records
+        </div>
+        <div>
+            <strong>Prediction Method:</strong><br>
+            Time Series Forecasting
+        </div>
+        <div>
+            <strong>Confidence Level:</strong><br>
+            Medium-High
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Analysis Table -->
+<div style="background: white; padding: 25px; border-radius: 15px; margin-top: 20px;">
+    <h3>📋 Detailed Expense Analysis</h3>
+    <table class="transaction-table">
+        <thead>
+            <tr>
+                <th>Metric</th>
+                <th>Value (PKR)</th>
+                <th>Insight</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Average Daily Expense</strong></td>
+                <td class="expense-text">PKR {{ "%.2f"|format(predictions.avg_daily_expense) }}</td>
+                <td>Your typical daily spending</td>
+            </tr>
+            <tr>
+                <td><strong>Highest Daily Expense</strong></td>
+                <td class="expense-text">PKR {{ "%.2f"|format(predictions.max_daily_expense) }}</td>
+                <td>⚠️ Largest single day expense</td>
+            </tr>
+            <tr>
+                <td><strong>Lowest Daily Expense</strong></td>
+                <td class="income-text">PKR {{ "%.2f"|format(predictions.min_daily_expense) }}</td>
+                <td>✅ Your most frugal day</td>
+            </tr>
+            <tr>
+                <td><strong>Next Month Prediction</strong></td>
+                <td class="expense-text">PKR {{ "%.2f"|format(predictions.next_month_total) }}</td>
+                <td>Expected total expenses</td>
+            </tr>
+            <tr>
+                <td><strong>Monthly Income Average</strong></td>
+                <td class="income-text">PKR {{ "%.2f"|format(predictions.avg_monthly_income) }}</td>
+                <td>Your average monthly earnings</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Prediction Chart (Visual) -->
+<div style="background: white; padding: 25px; border-radius: 15px; margin-top: 20px;">
+    <h3>📈 Prediction Visualization</h3>
+    <div style="margin-top: 20px;">
+        {% set max_value = [predictions.avg_monthly_income, predictions.next_month_total]|max %}
+        {% set scale = 100 / max_value if max_value > 0 else 1 %}
+        
+        <div style="margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span><strong>Current Monthly Average</strong></span>
+                <span>PKR {{ "%.2f"|format(predictions.avg_monthly_income) }}</span>
+            </div>
+            <div style="background: #e0e0e0; border-radius: 10px; height: 30px; overflow: hidden;">
+                <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); width: {{ (predictions.avg_monthly_income / max_value * 100) if max_value > 0 else 0 }}%; height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: bold;">
+                    {{ "%.0f"|format((predictions.avg_monthly_income / max_value * 100) if max_value > 0 else 0) }}%
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span><strong>📊 Predicted Next Month</strong></span>
+                <span>PKR {{ "%.2f"|format(predictions.next_month_total) }}</span>
+            </div>
+            <div style="background: #e0e0e0; border-radius: 10px; height: 30px; overflow: hidden;">
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); width: {{ (predictions.next_month_total / max_value * 100) if max_value > 0 else 0 }}%; height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: bold;">
+                    {{ "%.0f"|format((predictions.next_month_total / max_value * 100) if max_value > 0 else 0) }}%
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span><strong>💵 Expected Savings</strong></span>
+                <span class="{% if predictions.predicted_savings > 0 %}income-text{% else %}expense-text{% endif %}">
+                    PKR {{ "%.2f"|format(predictions.predicted_savings|abs) }}
+                </span>
+            </div>
+            <div style="background: #e0e0e0; border-radius: 10px; height: 30px; overflow: hidden;">
+                <div style="background: linear-gradient(135deg, {% if predictions.predicted_savings > 0 %}#11998e 0%, #38ef7d 100%{% else %}#eb3349 0%, #f45c43 100%{% endif %}); width: {{ (predictions.predicted_savings|abs / max_value * 100) if max_value > 0 else 0 }}%; height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: bold;">
+                    {{ "%.0f"|format((predictions.predicted_savings|abs / max_value * 100) if max_value > 0 else 0) }}%
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Recommendations -->
+<div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 25px; border-radius: 15px; margin-top: 20px; color: white;">
+    <h3>🤖 AI-Powered Recommendations</h3>
+    <ul style="margin-top: 15px; line-height: 2;">
+        {% if predictions.trend == 'increasing' %}
+            <li>⚠️ <strong>Alert:</strong> Your expenses are trending UPWARD. Consider reviewing your spending habits!</li>
+            <li>📉 <strong>Suggestion:</strong> Try to reduce non-essential expenses by 15% next month.</li>
+        {% else %}
+            <li>✅ <strong>Great job!</strong> Your expenses are trending downward. Keep up the good work!</li>
+        {% endif %}
+        
+        {% if predictions.predicted_savings <= 0 %}
+            <li>🚨 <strong>Warning:</strong> Based on current trends, you may overspend next month.</li>
+            <li>💡 <strong>Tip:</strong> Create a budget and track daily expenses more carefully.</li>
+        {% else %}
+            <li>🎯 <strong>Target:</strong> You're on track to save PKR {{ "%.2f"|format(predictions.predicted_savings) }} next month!</li>
+            <li>💰 <strong>Goal:</strong> Try to save 20% of your income for financial security.</li>
+        {% endif %}
+        
+        {% if predictions.overspending_days > 10 %}
+            <li>📊 <strong>Pattern detected:</strong> You have {{ predictions.overspending_days }} high-spending days.</li>
+            <li>🔍 <strong>Action:</strong> Review what caused these spikes and plan accordingly.</li>
+        {% elif predictions.overspending_days > 5 %}
+            <li>📈 <strong>Notice:</strong> You have {{ predictions.overspending_days }} days with higher than average spending.</li>
+        {% else %}
+            <li>🌟 <strong>Excellent!</strong> You're maintaining consistent spending habits.</li>
+        {% endif %}
+        
+        <li>💡 <strong>Daily target:</strong> Try to keep daily expenses below PKR {{ "%.0f"|format(predictions.avg_daily_expense * 1.1) }} to stay within budget.</li>
+    </ul>
+</div>
+
+<!-- Action Buttons -->
+<div style="margin-top: 30px; text-align: center; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+    <a href="{{ url_for('visualization') }}" class="btn btn-primary">📊 View Detailed Charts</a>
+    <a href="{{ url_for('backup') }}" class="btn btn-success">💾 Backup Your Data</a>
+    <a href="{{ url_for('add_transaction') }}" class="btn btn-warning">➕ Add More Transactions</a>
+</div>
+
+<!-- Info Note -->
+<div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px; text-align: center;">
+    <small>
+        ℹ️ <strong>How it works:</strong> The AI uses Linear Regression on your historical expense data to predict future spending. 
+        Predictions become more accurate as you add more transactions. For best results, add at least 10-15 expense records.
+    </small>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>📈 Financial Reports</h2>
+
+<div class="summary-cards">
+    <div class="card">
+        <h3>📊 Total Records</h3>
+        <div class="amount">{{ transactions|length }}</div>
+    </div>
+    <div class="card income">
+        <h3>💰 Total Income</h3>
+        <div class="amount">PKR{{ "%.2f"|format(total_income) }}</div>
+    </div>
+    <div class="card expense">
+        <h3>💸 Total Expenses</h3>
+        <div class="amount">PKR{{ "%.2f"|format(total_expense) }}</div>
+    </div>
+    <div class="card balance">
+        <h3>💵 Savings Rate</h3>
+        <div class="amount">{{ ((total_income - total_expense) / total_income * 100 if total_income > 0 else 0) | round(1) }}%</div>
+    </div>
+</div>
+
+<!-- Category Breakdown -->
+<h3>📂 Spending by Category</h3>
+<table class="transaction-table">
+    <thead>
+        <tr><th>Category</th>
+            <th>Amount Spent</th>
+            <th>Percentage</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cat, amount in category_spending.items() %}
+        <tr>
+            <td>{% if cat == 'food' %}🍔 Food
+               {% elif cat == 'transport' %}🚗 Transport
+               {% elif cat == 'bills' %}💡 Bills
+               {% elif cat == 'shopping' %}🛍️ Shopping
+               {% elif cat == 'entertainment' %}🎬 Entertainment
+               {% elif cat == 'health' %}🏥 Health
+               {% elif cat == 'education' %}📚 Education
+               {% elif cat == 'rent' %}🏠 Rent
+               {% else %}📌 {{ cat|title }}
+               {% endif %}
+            </td>
+            <td class="expense-text">PKR{{ "%.2f"|format(amount) }}</td>
+            <td>
+                <div style="background: #e0e0e0; border-radius: 10px; overflow: hidden;">
+                    <div style="background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); width: {{ (amount / total_expense * 100) if total_expense > 0 else 0 }}%; padding: 5px; color: white; text-align: center; font-size: 12px;">
+                        {{ ((amount / total_expense * 100) if total_expense > 0 else 0) | round(1) }}%
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div style="margin-top: 30px; text-align: center;">
+    <a href="{{ url_for('export_data') }}" class="btn btn-success">📥 Export to Excel</a>
+</div>
+{% endblock %}

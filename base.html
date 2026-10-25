@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Tracker - PKR</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #280905;
+            background-image:
+                radial-gradient(ellipse at top left, rgba(116, 10, 3, 0.45) 0%, transparent 60%),
+                radial-gradient(ellipse at bottom right, rgba(195, 17, 12, 0.2) 0%, transparent 55%);
+            min-height: 100vh;
+        }
+
+        /* ── Navigation Bar ─────────────────────────────────── */
+        .navbar {
+            background-color: #1a0503;
+            border-bottom: 2px solid #740A03;
+            padding: 0.9rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 3px 18px rgba(0, 0, 0, 0.55);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo h1 {
+            color: #f5c4a1;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            margin: 0;
+        }
+
+        .logo span {
+            font-size: 1.9rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #f0c9ae;
+            text-decoration: none;
+            padding: 7px 14px;
+            border-radius: 7px;
+            transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+            font-weight: 500;
+            font-size: 0.88rem;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover {
+            background: rgba(230, 80, 27, 0.22);
+            border-color: rgba(230, 80, 27, 0.4);
+            color: #fde0c8;
+            transform: translateY(-1px);
+        }
+
+        .welcome-text {
+            color: #E6501B;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 0 6px;
+            border-left: 2px solid #740A03;
+            margin-left: 4px;
+        }
+
+        .login-btn {
+            background: #740A03 !important;
+            border-color: #C3110C !important;
+            color: #fde8d8 !important;
+        }
+
+        .login-btn:hover {
+            background: #C3110C !important;
+        }
+
+        .register-btn {
+            background: #E6501B !important;
+            border-color: #E6501B !important;
+            color: #fff !important;
+        }
+
+        .register-btn:hover {
+            background: #c94214 !important;
+        }
+
+        .logout-btn {
+            background: rgba(195, 17, 12, 0.18) !important;
+            border-color: #C3110C !important;
+            color: #fca99a !important;
+        }
+
+        .logout-btn:hover {
+            background: #C3110C !important;
+            color: #fff !important;
+        }
+
+        /* ── Main Container ──────────────────────────────────── */
+        .container {
+            max-width: 1400px;
+            margin: 28px auto;
+            padding: 30px;
+            background: #fdf6f2;
+            border-radius: 18px;
+            border: 1px solid rgba(116, 10, 3, 0.25);
+            box-shadow:
+                0 2px 0 #740A03,
+                0 6px 40px rgba(40, 9, 5, 0.55);
+            animation: fadeIn 0.45s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Summary Cards ───────────────────────────────────── */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #280905 0%, #3d0b07 100%);
+            color: #f5c4a1;
+            padding: 26px 22px;
+            border-radius: 14px;
+            text-align: center;
+            border: 1px solid rgba(116, 10, 3, 0.6);
+            box-shadow: 0 4px 18px rgba(40, 9, 5, 0.35);
+            transition: transform 0.28s ease, box-shadow 0.28s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: #E6501B;
+            border-radius: 14px 14px 0 0;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(40, 9, 5, 0.5);
+        }
+
+        .card.income {
+            background: linear-gradient(145deg, #0c2a14 0%, #133520 100%);
+            border-color: rgba(39, 174, 96, 0.35);
+        }
+
+        .card.income::before { background: #2ecc71; }
+
+        .card.expense {
+            background: linear-gradient(145deg, #280905 0%, #4a0b06 100%);
+            border-color: rgba(195, 17, 12, 0.45);
+        }
+
+        .card.expense::before { background: #C3110C; }
+
+        .card.balance {
+            background: linear-gradient(145deg, #1e1005 0%, #3a1e06 100%);
+            border-color: rgba(230, 80, 27, 0.4);
+        }
+
+        .card.balance::before { background: #E6501B; }
+
+        .card h3 {
+            color: white;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .card .amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        /* ── Buttons ─────────────────────────────────────────── */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            display: inline-block;
+            letter-spacing: 0.2px;
+        }
+
+        .btn-primary {
+            background: #740A03;
+            color: #fde8d8;
+            border: 1px solid #C3110C;
+        }
+
+        .btn-primary:hover {
+            background: #C3110C;
+            color: #fff;
+        }
+
+        .btn-success {
+            background: #1a5e2e;
+            color: #d6f5e3;
+            border: 1px solid #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: #C3110C;
+            color: #fff;
+            border: 1px solid #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .btn-warning {
+            background: #7a3d05;
+            color: #ffe5b4;
+            border: 1px solid #E6501B;
+        }
+
+        .btn-warning:hover {
+            background: #E6501B;
+            color: #fff;
+        }
+
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 9, 5, 0.35);
+        }
+
+        /* ── Forms ───────────────────────────────────────────── */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #3d0b07;
+            font-size: 0.9rem;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e8c4b4;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fff8f5;
+            color: #280905;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #C3110C;
+            box-shadow: 0 0 0 3px rgba(195, 17, 12, 0.12);
+            background: #fff;
+        }
+
+        /* ── Tables ──────────────────────────────────────────── */
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .transaction-table th,
+        .transaction-table td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid #f0ddd5;
+        }
+
+        .transaction-table th {
+            background: #740A03;
+            color: #fde8d8;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .transaction-table tr:hover {
+            background: #fdf0ea;
+        }
+
+        .transaction-table td {
+            color: #2c0904;
+            font-size: 0.92rem;
+        }
+
+        .income-text {
+            color: #1a7a3a;
+            font-weight: 700;
+        }
+
+        .expense-text {
+            color: #C3110C;
+            font-weight: 700;
+        }
+
+        /* ── Filters ─────────────────────────────────────────── */
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            padding: 16px;
+            background: #fdf0e8;
+            border-radius: 10px;
+            border: 1px solid #f0ddd5;
+        }
+
+        .filters select,
+        .filters input {
+            padding: 8px 10px;
+            border: 1.5px solid #e8c4b4;
+            border-radius: 6px;
+            background: #fff8f5;
+            color: #280905;
+            font-size: 0.88rem;
+            transition: border-color 0.2s;
+        }
+
+        .filters select:focus,
+        .filters input:focus {
+            outline: none;
+            border-color: #C3110C;
+        }
+
+        /* ── Messages ────────────────────────────────────────── */
+        .message {
+            padding: 12px 18px;
+            margin: 10px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .success {
+            background: #d9f2e3;
+            color: #155724;
+            border: 1px solid #a8d9b8;
+        }
+
+        .error {
+            background: #fde8e8;
+            color: #7a0c0c;
+            border: 1px solid #f5b8b8;
+        }
+
+        /* ── Modal ───────────────────────────────────────────── */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(40, 9, 5, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #fdf6f2;
+            padding: 32px;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            border-top: 4px solid #C3110C;
+            box-shadow: 0 20px 60px rgba(40, 9, 5, 0.6);
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(-45px); opacity: 0; }
+            to   { transform: translateY(0); opacity: 1; }
+        }
+
+        /* ── Hero Section ────────────────────────────────────── */
+        .hero-section {
+            text-align: center;
+            padding: 64px 24px;
+            background: linear-gradient(145deg, #280905 0%, #4a0b06 60%, #280905 100%);
+            border-radius: 16px;
+            color: #f5c4a1;
+            margin-bottom: 30px;
+            border: 1px solid rgba(116, 10, 3, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #740A03, #E6501B, #740A03);
+        }
+
+        .hero-section h1 {
+            font-size: 2.4rem;
+            margin-bottom: 16px;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .hero-section p {
+            font-size: 1.15rem;
+            margin-bottom: 28px;
+            color: #f0c9ae;
+            opacity: 0.9;
+        }
+
+        /* ── Feature Grid ────────────────────────────────────── */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+            margin-top: 36px;
+        }
+
+        .feature-card {
+            background: #fdf6f2;
+            padding: 26px 22px;
+            border-radius: 14px;
+            text-align: center;
+            transition: transform 0.28s ease, box-shadow 0.28s ease;
+            border: 1px solid #f0ddd5;
+            border-top: 3px solid #C3110C;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(40, 9, 5, 0.2);
+        }
+
+        .feature-card span {
+            font-size: 2.8rem;
+            display: block;
+            margin-bottom: 14px;
+        }
+
+        .feature-card h3 {
+            color: #740A03;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            color: #6b3528;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        /* ── Section Headings (used across pages) ────────────── */
+        h2, h3 {
+            color: #3d0b07;
+        }
+
+        /* ── Footer ──────────────────────────────────────────── */
+        .footer {
+            text-align: center;
+            padding: 22px;
+            color: rgba(245, 196, 161, 0.55);
+            font-size: 0.85rem;
+            margin-top: 12px;
+            border-top: 1px solid rgba(116, 10, 3, 0.3);
+        }
+
+        /* ── Responsive ──────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .nav-links {
+                justify-content: center;
+            }
+
+            .container {
+                padding: 16px;
+                margin: 14px;
+                border-radius: 12px;
+            }
+
+            .transaction-table {
+                font-size: 12px;
+                display: block;
+                overflow-x: auto;
+            }
+
+            .transaction-table th,
+            .transaction-table td {
+                padding: 9px 10px;
+            }
+
+            .hero-section h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span>💰</span>
+                <h1>Finance Tracker Pro - PKR</h1>
+            </div>
+            <div class="nav-links">
+                {% if session.username %}
+                    <!-- Show these links when user is LOGGED IN -->
+                    <a href="{{ url_for('dashboard') }}">📊 Dashboard</a>
+                    <a href="{{ url_for('add_transaction') }}">➕ Add Transaction</a>
+                    <a href="{{ url_for('view_transactions') }}">📋 View All</a>
+                    <a href="{{ url_for('visualization') }}">📈 Analytics</a>
+                    <a href="{{ url_for('prediction') }}">🔮 Predict</a>
+                    <a href="{{ url_for('reports') }}">📑 Reports</a>
+                    <a href="{{ url_for('restore') }}">💾 Backup</a>
+                    <span class="welcome-text">👋 Hello, {{ session.username }}</span>
+                    <a href="{{ url_for('logout') }}" class="logout-btn">🚪 Logout</a>
+                {% else %}
+                    <!-- Show these links when user is NOT LOGGED IN -->
+                    <a href="{{ url_for('login') }}" class="login-btn">🔐 Login</a>
+                    <a href="{{ url_for('register') }}" class="register-btn">📝 Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <div class="footer">
+        <p>💰 Personal Finance Tracker | Made with ❤️ for Pakistan | All amounts in PKR</p>
+    </div>
+
+    <script>
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (modal && event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

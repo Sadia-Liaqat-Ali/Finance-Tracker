@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>💾 Data Backup & Restore</h2>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px;">
+    
+    <!-- Backup Section -->
+    <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+        <h3>📦 Create New Backup</h3>
+        <p style="margin: 15px 0; color: #666;">Export all your financial data to Excel and JSON format for safekeeping.</p>
+        <a href="{{ url_for('backup') }}" class="btn btn-success" style="width: 100%;">💾 Create Backup Now</a>
+    </div>
+    
+    <!-- Restore Section -->
+    <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+        <h3>🔄 Restore from Backup</h3>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Upload JSON Backup File</label>
+                <input type="file" name="backup_file" accept=".json" required style="border: 1px solid #ddd; padding: 10px;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">📂 Restore Data</button>
+            <small style="display: block; margin-top: 10px; color: #e74c3c;">
+                ⚠️ Warning: Restoring will replace ALL your current data!
+            </small>
+        </form>
+    </div>
+</div>
+
+<!-- Existing Backups List -->
+{% if backups %}
+<h3 style="margin-top: 40px;">📋 Your Backup Files</h3>
+<div style="overflow-x: auto;">
+    <table class="transaction-table">
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Size</th>
+                <th>Date Created</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for backup in backups %}
+            <tr>
+                <td>{{ backup.name }}</td>
+                <td>{{ backup.size }}</td>
+                <td>{{ backup.date }}</td>
+                <td>
+                    <a href="{{ url_for('download_backup', filename=backup.name) }}" class="btn btn-primary btn-sm">📥 Download</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Info Box -->
+<div style="background: #e8f4f8; padding: 20px; border-radius: 10px; margin-top: 30px;">
+    <h4>ℹ️ Backup Information</h4>
+    <ul style="margin-top: 10px; margin-left: 20px;">
+        <li>Backups are saved in the <code>backups/</code> folder inside your project</li>
+        <li>Each backup includes an Excel file (.xlsx) and JSON file (.json)</li>
+        <li>You can manually copy the <code>finance.db</code> file as an additional backup</li>
+        <li>Regular backups are recommended (weekly or monthly)</li>
+    </ul>
+</div>
+{% endblock %}

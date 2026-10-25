@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section">
+    <h1>💰 Welcome to Personal Finance Tracker</h1>
+    <p>Take control of your money with our easy-to-use finance tracker!</p>
+    <p style="font-size: 1rem; opacity: 0.9;">Smart AI predictions • Beautiful charts • Complete control</p>
+    <div style="margin-top: 30px;">
+        <a href="{{ url_for('login') }}" class="btn" style="background: white; color: #667eea; padding: 12px 30px; margin: 0 10px;">🔐 Login</a>
+        <a href="{{ url_for('register') }}" class="btn" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 30px; margin: 0 10px;">📝 Create Account</a>
+    </div>
+</div>
+
+<div class="feature-grid">
+    <div class="feature-card">
+        <span>📊</span>
+        <h3>Track Expenses</h3>
+        <p>Record and categorize every transaction with ease</p>
+    </div>
+    <div class="feature-card">
+        <span>📈</span>
+        <h3>Visual Reports</h3>
+        <p>View beautiful charts and spending trends</p>
+    </div>
+    <div class="feature-card">
+        <span>🤖</span>
+        <h3>AI Predictions</h3>
+        <p>Get future expense forecasts with machine learning</p>
+    </div>
+    <div class="feature-card">
+        <span>💾</span>
+        <h3>Backup & Export</h3>
+        <p>Keep your data safe with Excel export</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>📊 Financial Analytics & Insights</h2>
+
+<!-- Charts Section -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px; margin-bottom: 40px;">
+    
+    <!-- Monthly Chart -->
+    <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+        <h3 style="color: #2c3e50; margin-bottom: 15px;">📅 Monthly Income vs Expenses</h3>
+        {% if monthly_chart %}
+            <img src="data:image/png;base64,{{ monthly_chart }}" alt="Monthly Chart" style="width: 100%; border-radius: 10px;">
+        {% else %}
+            <p style="text-align: center; color: #999; padding: 40px;">Add transactions to see charts!</p>
+        {% endif %}
+    </div>
+    
+    <!-- Category Chart -->
+    <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+        <h3 style="color: #2c3e50; margin-bottom: 15px;">🥧 Expense by Category</h3>
+        {% if category_chart %}
+            <img src="data:image/png;base64,{{ category_chart }}" alt="Category Chart" style="width: 100%; border-radius: 10px;">
+        {% else %}
+            <p style="text-align: center; color: #999; padding: 40px;">No expense data available!</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Spending Trend -->
+<div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 30px;">
+    <h3 style="color: #2c3e50; margin-bottom: 15px;">📈 Daily Spending Trend</h3>
+    {% if trend_chart %}
+        <img src="data:image/png;base64,{{ trend_chart }}" alt="Trend Chart" style="width: 100%; border-radius: 10px;">
+    {% else %}
+        <p style="text-align: center; color: #999; padding: 40px;">Add daily expenses to see trends!</p>
+    {% endif %}
+</div>
+
+<!-- Monthly Summary Table -->
+<h3>📋 Monthly Summary Report</h3>
+<div style="overflow-x: auto;">
+    <table class="transaction-table">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Income (PKR)</th>
+                <th>Expenses (PKR)</th>
+                <th>Balance (PKR)</th>
+                <th>Savings Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for month_key, month_data in monthly_data.items() %}
+            <tr>
+                <td>{{ month_data.month_name }}</td>
+                <td class="income-text">PKR {{ "%.2f"|format(month_data.income) }}</td>
+                <td class="expense-text">PKR {{ "%.2f"|format(month_data.expense) }}</td>
+                <td class="{% if month_data.balance >= 0 %}income-text{% else %}expense-text{% endif %}">
+                    PKR {{ "%.2f"|format(month_data.balance) }}
+                </td>
+                <td>
+                    {% if month_data.savings_rate > 0 %}
+                        <span style="color: #27ae60;">+{{ "%.1f"|format(month_data.savings_rate) }}%</span>
+                    {% else %}
+                        <span style="color: #e74c3c;">{{ "%.1f"|format(month_data.savings_rate) }}%</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" style="text-align: center;">No data available</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Yearly Summary -->
+{% if yearly_data and yearly_data|length > 0 %}
+<h3 style="margin-top: 30px;">📆 Yearly Summary Report</h3>
+<div style="overflow-x: auto;">
+    <table class="transaction-table">
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th>Income (PKR)</th>
+                <th>Expenses (PKR)</th>
+                <th>Balance (PKR)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for year_key, year_data in yearly_data.items() %}
+            <tr>
+                <td>{{ year_data.year }}</td>
+                <td class="income-text">PKR {{ "%.2f"|format(year_data.income) }}</td>
+                <td class="expense-text">PKR {{ "%.2f"|format(year_data.expense) }}</td>
+                <td class="{% if year_data.balance >= 0 %}income-text{% else %}expense-text{% endif %}">
+                    PKR {{ "%.2f"|format(year_data.balance) }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Spending Insights -->
+<div style="margin-top: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 15px; color: white;">
+    <h3>💡 Spending Insights</h3>
+    <ul style="margin-top: 15px; list-style: none;">
+        {% if monthly_data and monthly_data|length > 0 %}
+            {% set highest_month = None %}
+            {% set highest_amount = 0 %}
+            {% set best_month = None %}
+            {% set best_rate = -100 %}
+            
+            {% for month_key, month_data in monthly_data.items() %}
+                {% if month_data.expense > highest_amount %}
+                    {% set highest_amount = month_data.expense %}
+                    {% set highest_month = month_data %}
+                {% endif %}
+                {% if month_data.savings_rate > best_rate %}
+                    {% set best_rate = month_data.savings_rate %}
+                    {% set best_month = month_data %}
+                {% endif %}
+            {% endfor %}
+            
+            {% if highest_month %}
+                <li>🔴 Highest spending month: {{ highest_month.month_name }} (PKR {{ "%.2f"|format(highest_month.expense) }})</li>
+            {% endif %}
+            
+            {% if best_month %}
+                <li>🟢 Best savings month: {{ best_month.month_name }} ({{ "%.1f"|format(best_month.savings_rate) }}% savings rate)</li>
+            {% endif %}
+        {% else %}
+            <li>Add transactions to get personalized insights!</li>
+        {% endif %}
+    </ul>
+</div>
+
+<div style="margin-top: 20px; text-align: center;">
+    <a href="{{ url_for('backup') }}" class="btn btn-success">💾 Create Backup</a>
+    <a href="{{ url_for('prediction') }}" class="btn btn-primary">🔮 View AI Predictions</a>
+    <a href="{{ url_for('export_data') }}" class="btn btn-warning">📥 Export to Excel</a>
+</div>
+{% endblock %}
